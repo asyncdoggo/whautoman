@@ -1,6 +1,3 @@
-# python
-# coding: utf-8
-
 import os
 import time
 import pandas
@@ -82,5 +79,7 @@ class Automate:
 
 
 if __name__ == "__main__":
-    test = Automate()
+    data = pandas.read_excel("data.xlsx", sheet_name="Sheet1")
+    numbers = data["Numbers"].to_list()
+    test = Automate(numbers)
     test.send("TEXTDATA", "hello")

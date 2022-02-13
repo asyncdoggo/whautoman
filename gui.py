@@ -1,74 +1,79 @@
+import threading
 import tkinter as tk
+from tkinter import filedialog
 
 import pandas
 
 import main
-import threading
-from tkinter import filedialog
+
+xlsx = ""
+text = ""
+
+
+def get_selected_row(event):
+    try:
+        global selected_tuple
+        index = list1.curselection()[0]
+        selected_tuple = list1.get(index)
+        # TODO: add code
+    except:
+        pass
 
 
 def send():
-    b3.configure(state="disabled")
-    xlsx = excel_file.cget("text")
-    text = text_file.cget("text")
+    btn_start.configure(state="disabled")
 
     if xlsx and text:
-        with open(text,'r') as f:
+        with open(text, 'r') as f:
             msg_data = f.read()
-
         data = pandas.read_excel(xlsx, sheet_name="Sheet1")
         numbers = data["Numbers"].to_list()
-
+        print(xlsx, text)
         obj = main.Automate(numbers)
-        obj.send("textdata",msg_data)
+        obj.send("textdata", msg_data)
     else:
         print("empty")
 
 
-
-
 def BrowseExcelFile():
+    global xlsx
     filename = filedialog.askopenfilename(title="Select a File")
-    excel_file.configure(text=filename)
+    xlsx = filename
+    list1.insert(tk.END,("Selected file",filename))
 
 
 def BrowseTextFile():
+    global text
     filename = filedialog.askopenfilename(title="Select a File")
-    text_file.configure(text=filename)
+    text = filename
+    list1.insert(tk.END, ("Selected file", filename))
 
 
 window = tk.Tk()
-l1 = tk.Label(window, text="excel file")
-l1.grid(row=0, column=0)
+window.title("Whatsapp automation")
+window.rowconfigure(0, minsize=800, weight=1)
+window.columnconfigure(1, minsize=800, weight=1)
 
-l3 = tk.Label(window, text="text file")
-l3.grid(row=1, column=0)
+list1 = tk.Listbox(window)
+fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
+btn_excel = tk.Button(fr_buttons, text="Open Excel file", command=BrowseExcelFile)
+btn_text = tk.Button(fr_buttons, text="Open text file", command=BrowseTextFile)
+btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send, daemon=True).start())
+btn_close = tk.Button(fr_buttons, text="close", command=window.destroy)
+sb = tk.Scrollbar(window)
 
-b1 = tk.Button(window, text="select file", width=12, command=BrowseExcelFile)
-b1.grid(row=0, column=2)
-b2 = tk.Button(window, text="select file", width=12, command=BrowseTextFile)
-b2.grid(row=1, column=2)
+btn_excel.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+btn_text.grid(row=1, column=0, sticky="ew", padx=5)
+btn_start.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+btn_close.grid(row=3, column=0, sticky="ew", padx=5)
+sb.grid(row=0, column=2, rowspan=6, sticky="nse")
 
-excel_file = tk.Label(window, text="", width=100, height=4, fg="blue")
-excel_file.grid(row=0, column=1)
-text_file = tk.Label(window, text="", width=100, height=4, fg="blue")
-text_file.grid(row=1, column=1)
+fr_buttons.grid(row=0, column=0, sticky="ns")
+list1.grid(row=0, column=1, sticky="nsew")
 
-b3 = tk.Button(window, text="start", width=12, command=lambda: threading.Thread(target=send,daemon=True).start())
-b3.grid(row=1, column=3)
+list1.configure(yscrollcommand=sb.set)
+sb.configure(command=list1.yview)
 
-list1 = tk.Listbox(window, height=6, width=35)
-list1.grid(row=2, column=0, rowspan=6, columnspan=2)
-
-sb1 = tk.Scrollbar(window)
-sb1.grid(row=2, column=2, rowspan=6)
-
-list1.configure(yscrollcommand=sb1.set)
-sb1.configure(command=list1.yview)
-
-# list1.bind('<<ListboxSelect>>', "get_selected_row")
-
-b6 = tk.Button(window, text="Close", width=12, command=window.destroy)
-b6.grid(row=7, column=3)
+list1.bind('<<ListboxSelect>>', get_selected_row)
 
 window.mainloop()
