@@ -12,6 +12,8 @@ text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span
 loading_circle = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/div[3]/div/div[2]/div[2]/div/svg"
 starting_chat = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div/div[1]"
 
+cmsg = ("Sending", "")
+
 
 class Automate:
 
@@ -36,6 +38,8 @@ class Automate:
                 break
 
     def send(self, datatype, data):
+        global cmsg
+
         for i in self.numbers:
             time.sleep(2)
             phone = str(i)
@@ -50,6 +54,7 @@ class Automate:
                         elem = self.driver.find_element(By.XPATH, ok_button)
                         if elem.text == "OK":
                             flag = -1
+                            cmsg = ("Number not found ", phone)
                             break
                     except (NoSuchElementException, StaleElementReferenceException):
                         pass
@@ -73,10 +78,12 @@ class Automate:
                         text = self.driver.find_element(By.XPATH, text_box)
                         text.send_keys(data)
                         text.send_keys(Keys.ENTER)
+                        cmsg = ("Message sent to ", phone)
                         break
                     except NoSuchElementException:
                         continue
 
+        cmsg = ('END',"")
 
 if __name__ == "__main__":
     data = pandas.read_excel("data.xlsx", sheet_name="Sheet1")

@@ -1,13 +1,24 @@
 import threading
 import tkinter as tk
 from tkinter import filedialog
-
 import pandas
-
 import main
 
 xlsx = ""
 text = ""
+
+
+def insert_to_list():
+    log = (None, None)
+    prev = ()
+    while log[0] != 'END':
+        log = main.cmsg
+        if prev != log:
+            prev = log
+            s = str(log[0]) + str(log[1])
+            list1.insert(tk.END, s)
+
+    list1.insert(tk.END,"Finished sending")
 
 
 def get_selected_row(event):
@@ -29,6 +40,9 @@ def send():
         data = pandas.read_excel(xlsx, sheet_name="Sheet1")
         numbers = data["Numbers"].to_list()
         print(xlsx, text)
+
+        t1 = threading.Thread(target=insert_to_list)
+        t1.start()
         obj = main.Automate(numbers)
         obj.send("textdata", msg_data)
     else:
@@ -39,7 +53,7 @@ def BrowseExcelFile():
     global xlsx
     filename = filedialog.askopenfilename(title="Select a File")
     xlsx = filename
-    list1.insert(tk.END,("Selected file",filename))
+    list1.insert(tk.END, ("Selected file", filename))
 
 
 def BrowseTextFile():
