@@ -5,7 +5,7 @@ import os
 import time
 import pandas
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException,StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -18,7 +18,8 @@ starting_chat = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div
 
 class Automate:
 
-    def __init__(self):
+    def __init__(self, numbers):
+        self.numbers = numbers
         # install driver
         path = ChromeDriverManager().install()
         path = path.replace("chromedriver.exe", "")
@@ -37,11 +38,6 @@ class Automate:
             except NoSuchElementException:
                 break
 
-        # setup pandas
-        file = "data.xlsx"
-        self.data = pandas.read_excel(file, sheet_name="Sheet1")
-        self.numbers = self.data["Numbers"].to_list()
-
     def send(self, datatype, data):
         for i in self.numbers:
             time.sleep(2)
@@ -52,13 +48,13 @@ class Automate:
             flag = 0
             while True:
                 try:
-                    self.driver.find_element(By.XPATH,starting_chat)
+                    self.driver.find_element(By.XPATH, starting_chat)
                     try:
                         elem = self.driver.find_element(By.XPATH, ok_button)
                         if elem.text == "OK":
                             flag = -1
                             break
-                    except (NoSuchElementException,StaleElementReferenceException):
+                    except (NoSuchElementException, StaleElementReferenceException):
                         pass
 
                 except NoSuchElementException:
@@ -72,7 +68,7 @@ class Automate:
 
             while True:
                 try:
-                    self.driver.find_element(By.XPATH,loading_circle)
+                    self.driver.find_element(By.XPATH, loading_circle)
                 except NoSuchElementException:
 
                     # get text box and send (text box is reassigned to avoid StaleElementReferenceException)
