@@ -6,7 +6,10 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
+qr_code = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[2]/div"
 ok_button = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div/div[2]"
 text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[2]"
 loading_circle = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/div[3]/div/div[2]/div[2]/div/svg"
@@ -19,6 +22,7 @@ class Automate:
 
     def __init__(self, numbers):
         self.numbers = numbers
+
         # install driver
         path = ChromeDriverManager().install()
         path = path.replace("chromedriver.exe", "")
@@ -27,15 +31,11 @@ class Automate:
 
         # setup
         self.driver = webdriver.Chrome()
-
+        self.wait = WebDriverWait(self.driver,600)
         self.driver.get("https://web.whatsapp.com/")
 
         # initial qr login
-        while True:
-            try:
-                self.driver.find_element(By.CLASS_NAME, "_2UwZ_")
-            except NoSuchElementException:
-                break
+        self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
     def send(self, datatype, data):
         global cmsg
@@ -45,7 +45,7 @@ class Automate:
             phone = str(i)
             self.driver.get(f"https://web.whatsapp.com/send?phone=91{phone}")
 
-            # check for wrong number and continue loop if found
+            # check for wrong number (not used EC here because uncertainty)
             flag = 0
             while True:
                 try:
@@ -68,20 +68,10 @@ class Automate:
             if flag == -1:
                 continue
 
-            while True:
-                try:
-                    self.driver.find_element(By.XPATH, loading_circle)
-                except NoSuchElementException:
-
-                    # get text box and send (text box is reassigned to avoid StaleElementReferenceException)
-                    try:
-                        text = self.driver.find_element(By.XPATH, text_box)
-                        text.send_keys(data)
-                        text.send_keys(Keys.ENTER)
-                        cmsg = ("Message sent to ", phone)
-                        break
-                    except NoSuchElementException:
-                        continue
+            text = self.wait.until(EC.visibility_of_element_located((By.XPATH, text_box)))
+            text.send_keys(data)
+            text.send_keys(Keys.ENTER)
+            cmsg = ("Message sent to ", phone)
 
         cmsg = ('END',"")
 
