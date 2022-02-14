@@ -6,6 +6,7 @@ import main
 
 xlsx = ""
 text = ""
+image = ""
 
 
 def insert_to_list():
@@ -18,7 +19,8 @@ def insert_to_list():
             s = str(log[0]) + str(log[1])
             list1.insert(tk.END, s)
 
-    list1.insert(tk.END,"Finished sending")
+    list1.insert(tk.END, "Finished sending")
+    btn_start.configure(state="normal")
 
 
 def get_selected_row(event):
@@ -32,35 +34,64 @@ def get_selected_row(event):
 
 
 def send():
-    btn_start.configure(state="disabled")
+    t1 = threading.Thread(target=insert_to_list)
+    if xlsx:
+        excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
+        numbers = excel_data["Numbers"].to_list()
+        if text:
+            with open(text, 'r') as f:
+                data = f.read()
+            t1.start()
+            btn_start.configure(state="disabled")
+            obj = main.Automate(numbers)
+            obj.send('TEXT', data)
 
-    if xlsx and text:
-        with open(text, 'r') as f:
-            msg_data = f.read()
-        data = pandas.read_excel(xlsx, sheet_name="Sheet1")
-        numbers = data["Numbers"].to_list()
-        print(xlsx, text)
+        elif image:
+            data = image
+            t1.start()
+            btn_start.configure(state="disabled")
+            obj = main.Automate(numbers)
+            obj.send('IMAGE', data)
 
-        t1 = threading.Thread(target=insert_to_list)
-        t1.start()
-        obj = main.Automate(numbers)
-        obj.send("textdata", msg_data)
+        else:
+            list1.insert(tk.END, "Please select an image or text file to send")
     else:
-        print("empty")
+        list1.insert(tk.END, "Please select an excel file")
 
 
-def BrowseExcelFile():
+# TODO: add file type assertion to browse
+def browse_excel():
     global xlsx
-    filename = filedialog.askopenfilename(title="Select a File")
-    xlsx = filename
-    list1.insert(tk.END, ("Selected file", filename))
+    xlsx = filedialog.askopenfilename(title="Select a File")
+
+    if xlsx:
+        list1.insert(tk.END, f"Selected excel file {xlsx}")
 
 
-def BrowseTextFile():
+def browse_text():
     global text
-    filename = filedialog.askopenfilename(title="Select a File")
-    text = filename
-    list1.insert(tk.END, ("Selected file", filename))
+    global image
+    text = filedialog.askopenfilename(title="Select a File")
+
+    if text:
+        list1.insert(tk.END, f"Selected text file {text}")
+        if image:
+            list1.insert(tk.END, "Text file was selected, unselecting Image Folder")
+            image = ""
+
+
+def browse_img():
+    global image
+    global text
+    image = filedialog.askdirectory(title="Select a Folder")
+
+    image = image.replace('/','\\')
+
+    if image:
+        list1.insert(tk.END, f"Selected image/video Folder {image}")
+        if text:
+            list1.insert(tk.END, "Image Folder was selected, unselecting Text file")
+            text = ""
 
 
 window = tk.Tk()
@@ -70,16 +101,19 @@ window.columnconfigure(1, minsize=800, weight=1)
 
 list1 = tk.Listbox(window)
 fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
-btn_excel = tk.Button(fr_buttons, text="Open Excel file", command=BrowseExcelFile)
-btn_text = tk.Button(fr_buttons, text="Open text file", command=BrowseTextFile)
+btn_excel = tk.Button(fr_buttons, text="Open Excel file", command=browse_excel)
+btn_text = tk.Button(fr_buttons, text="Open text file", command=browse_text)
 btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send, daemon=True).start())
 btn_close = tk.Button(fr_buttons, text="close", command=window.destroy)
+btn_img = tk.Button(fr_buttons, text="image/video", command=browse_img)
+
 sb = tk.Scrollbar(window)
 
 btn_excel.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 btn_text.grid(row=1, column=0, sticky="ew", padx=5)
-btn_start.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-btn_close.grid(row=3, column=0, sticky="ew", padx=5)
+btn_img.grid(row=2, column=0, sticky="ew", padx=5)
+btn_start.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+btn_close.grid(row=4, column=0, sticky="ew", padx=5)
 sb.grid(row=0, column=2, rowspan=6, sticky="nse")
 
 fr_buttons.grid(row=0, column=0, sticky="ns")

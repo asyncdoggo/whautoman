@@ -1,4 +1,5 @@
 import os
+import subprocess
 import time
 import pandas
 from selenium import webdriver
@@ -9,6 +10,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+# xpath definitions
+send_btn = "/html/body/div[1]/div[1]/div[1]/div[2]/div[2]/span/div[1]/span/div[1]/div/div[2]/div/div[2]/div[2]/div/div"
+imgvid_btn = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div[1]/div/ul/li[1]/button"
+pinbutton = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]"
 qr_code = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[2]/div"
 ok_button = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div/div[2]"
 text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[2]"
@@ -29,15 +34,60 @@ class Automate:
         # add driver to path
         os.environ["PATH"] += os.pathsep + path
 
-        # setup
+        # start driver
         self.driver = webdriver.Chrome()
-        self.wait = WebDriverWait(self.driver,600)
+        self.wait = WebDriverWait(self.driver, 600)
         self.driver.get("https://web.whatsapp.com/")
 
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
-    def send(self, datatype, data):
+    def send_img_vid(self, file_path):
+        # local functions
+        def get_file_paths(path):
+            file_name = []
+
+            for files in os.listdir(path):
+                root, ext = os.path.splitext(files)
+                if ext == ".png" or ext == ".jpg" or ext == ".mp3" or ext == ".gif" or ext == "jpeg":
+                    file_name.append(path + str("\\") + files)
+
+            return file_name
+
+        def parse_paths(paths):
+            ans = ""
+            for i in paths:
+                ans = ans + str(i)
+                ans = ans + str(" ")
+            return ans
+
+        # Access the pin button
+        pin = self.wait.until(EC.presence_of_element_located((By.XPATH, pinbutton)))
+        pin.click()
+
+        # Access the images and video button
+        image_icon = self.wait.until(
+            EC.presence_of_element_located((By.XPATH, imgvid_btn)))
+        image_icon.click()
+
+        # Get all the images and videos path from the given directory
+        img_list = get_file_paths(file_path)
+
+        # Convert list of path to a single string (because it is required by subprocess)
+        parse_path = parse_paths(img_list)
+
+        # Use custom autoit script to insert doc path
+        time.sleep(1)  # SHORT SLEEP TO LET OPEN PROMPT START
+        subprocess.run(['AutoIt_Script.exe', parse_path], shell=True)  # runs .exe autoit file
+        time.sleep(1)
+
+        # Access the send button
+        send_button = self.wait.until(
+            EC.presence_of_element_located((By.XPATH, send_btn)))
+        send_button.click()
+        time.sleep(1)
+
+    def send(self, data_type, data):
         global cmsg
 
         for i in self.numbers:
@@ -69,14 +119,21 @@ class Automate:
                 continue
 
             text = self.wait.until(EC.visibility_of_element_located((By.XPATH, text_box)))
-            text.send_keys(data)
-            text.send_keys(Keys.ENTER)
-            cmsg = ("Message sent to ", phone)
 
-        cmsg = ('END',"")
+            if data_type == 'TEXT':
+                text.send_keys(data)
+                text.send_keys(Keys.ENTER)
+                cmsg = ("Message sent to ", phone)
+
+            if data_type == 'IMAGE':
+                self.send_img_vid(data)
+                cmsg = ("Message sent to ", phone)
+
+        cmsg = ('END', "")
+
 
 if __name__ == "__main__":
-    data = pandas.read_excel("data.xlsx", sheet_name="Sheet1")
-    numbers = data["Numbers"].to_list()
-    test = Automate(numbers)
+    excdata = pandas.read_excel("data.xlsx", sheet_name="Sheet1")
+    number = excdata["Numbers"].to_list()
+    test = Automate(number)
     test.send("TEXTDATA", "hello")
