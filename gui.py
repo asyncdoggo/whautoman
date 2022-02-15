@@ -8,6 +8,8 @@ xlsx = ""
 text = ""
 image = ""
 
+not_found = []
+
 
 def insert_to_list():
     log = (None, None)
@@ -18,8 +20,16 @@ def insert_to_list():
             prev = log
             s = str(log[0]) + str(log[1])
             list1.insert(tk.END, s)
+            if "not" in log[0]:
+                not_found.append(log[1])
 
     list1.insert(tk.END, "Finished sending")
+
+    with open("not_found.txt", 'w') as file:
+        for i in not_found:
+            file.write(f"{i}\n")
+
+    list1.insert(tk.END, "Numbers that were not found have been put in the file \"not_found.txt\"")
     btn_start.configure(state="normal")
 
 
@@ -85,7 +95,7 @@ def browse_img():
     global text
     image = filedialog.askdirectory(title="Select a Folder")
 
-    image = image.replace('/','\\')
+    image = image.replace('/', '\\')
 
     if image:
         list1.insert(tk.END, f"Selected image/video Folder {image}")
