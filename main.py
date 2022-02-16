@@ -1,6 +1,7 @@
 import os
 import subprocess
 import time
+from typing import Union
 import pandas
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
@@ -12,7 +13,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # xpath definitions
 send_btn = "/html/body/div[1]/div[1]/div[1]/div[2]/div[2]/span/div[1]/span/div[1]/div/div[2]/div/div[2]/div[2]/div/div"
-imgvid_btn = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div[1]/div/ul/li[1]/button"
+imgvid_btn = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div[" \
+             "1]/div/ul/li[1]/button "
 pinbutton = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]"
 qr_code = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[2]/div"
 ok_button = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div/div[2]"
@@ -24,7 +26,7 @@ cmsg = ("Please wait....", "")
 
 class Automate:
 
-    def __init__(self, numbers):
+    def __init__(self, numbers: list):
         self.numbers = numbers
 
         # install driver
@@ -41,19 +43,9 @@ class Automate:
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
-    def send_img_vid(self, file_path):
+    def send_img_vid(self, images: list):
         # local functions
-        def get_file_paths(path):
-            file_name = []
-
-            for files in os.listdir(path):
-                root, ext = os.path.splitext(files)
-                if ext == ".png" or ext == ".jpg" or ext == ".mp3" or ext == ".gif" or ext == "jpeg":
-                    file_name.append(path + str("\\") + files)
-
-            return file_name
-
-        def parse_paths(paths):
+        def parse_paths(paths: list) -> str:
             ans = ""
             for i in paths:
                 ans = ans + str(i)
@@ -69,15 +61,12 @@ class Automate:
             EC.presence_of_element_located((By.XPATH, imgvid_btn)))
         image_icon.click()
 
-        # Get all the images and videos path from the given directory
-        img_list = get_file_paths(file_path)
-
         # Convert list of path to a single string (because it is required by subprocess)
-        parse_path = parse_paths(img_list)
+        combine_path = parse_paths(images)
 
-        # Use custom autoit script to insert doc path
         time.sleep(1)  # SHORT SLEEP TO LET OPEN PROMPT START
-        subprocess.run(['AutoIt_Script.exe', parse_path], shell=True)  # runs .exe autoit file
+        # Use autoit script
+        subprocess.run(['AutoIt_Script.exe', combine_path], shell=True)
         time.sleep(1)
 
         # Access the send button
@@ -86,7 +75,7 @@ class Automate:
         send_button.click()
         time.sleep(1)
 
-    def send(self, data_type, data):
+    def send(self, data_type: str, data: Union[str, list]) -> None:
         global cmsg
 
         for i in self.numbers:
@@ -129,6 +118,7 @@ class Automate:
                 cmsg = ("Message sent to ", phone)
 
         cmsg = ('END', "")
+        time.sleep(5)  # wait for 5 sec and close browser
 
 
 if __name__ == "__main__":
