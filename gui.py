@@ -13,16 +13,15 @@ filetype = ".apng .avif .gif .jpg, .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp 
 
 
 def insert_to_list() -> None:
-    log = (None, None)
+    log = ""
     prev = ()
-    while log[0] != 'END':
+    while log != 'END':
         log = main.cmsg
         if prev != log:
             prev = log
-            s = str(log[0]) + str(log[1])
-            list1.insert(tk.END, s)
-            if "not" in log[0]:
-                not_found.append(log[1])
+            list1.insert(tk.END, log)
+            if "not" in log:
+                not_found.append(log)
 
     list1.insert(tk.END, "Finished sending")
 
