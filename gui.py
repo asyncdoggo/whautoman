@@ -6,12 +6,13 @@ import main
 
 xlsx = ""
 text = ""
-image = ""
-
+images = []
 not_found = []
+filetype = ".apng .avif .gif .jpg, .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov .wmv " \
+           ".avi .avchd .mkv .webm"
 
 
-def insert_to_list():
+def insert_to_list() -> None:
     log = (None, None)
     prev = ()
     while log[0] != 'END':
@@ -33,17 +34,7 @@ def insert_to_list():
     btn_start.configure(state="normal")
 
 
-def get_selected_row(event):
-    try:
-        global selected_tuple
-        index = list1.curselection()[0]
-        selected_tuple = list1.get(index)
-        # TODO: add code
-    except:
-        pass
-
-
-def send():
+def send() -> None:
     t1 = threading.Thread(target=insert_to_list)
     if xlsx:
         excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
@@ -56,8 +47,8 @@ def send():
             obj = main.Automate(numbers)
             obj.send('TEXT', data)
 
-        elif image:
-            data = image
+        elif images:
+            data = images
             t1.start()
             btn_start.configure(state="disabled")
             obj = main.Automate(numbers)
@@ -69,38 +60,38 @@ def send():
         list1.insert(tk.END, "Please select an excel file")
 
 
-# TODO: add file type assertion to browse
-def browse_excel():
+def browse_excel() -> None:
     global xlsx
-    xlsx = filedialog.askopenfilename(title="Select a File")
+    xlsx = filedialog.askopenfilename(title="Select a Excel File", filetypes=[("Excel file", ".xlsx .xls")])
 
     if xlsx:
         list1.insert(tk.END, f"Selected excel file {xlsx}")
 
 
-def browse_text():
+def browse_text() -> None:
     global text
-    global image
-    text = filedialog.askopenfilename(title="Select a File")
+    global images
+    text = filedialog.askopenfilename(title="Select a text File", filetypes=[("Text file", ".txt")])
 
     if text:
         list1.insert(tk.END, f"Selected text file {text}")
-        if image:
-            list1.insert(tk.END, "Text file was selected, unselecting Image Folder")
-            image = ""
+        if images:
+            list1.insert(tk.END, "Text file was selected, unselecting Image Files")
+            images = ()
 
 
-def browse_img():
-    global image
+def browse_img() -> None:
+    global images
     global text
-    image = filedialog.askdirectory(title="Select a Folder")
+    images = list(
+        filedialog.askopenfilenames(title="Select Images/videos", filetypes=[("Images and Videos", filetype)]))
 
-    image = image.replace('/', '\\')
-
-    if image:
-        list1.insert(tk.END, f"Selected image/video Folder {image}")
+    if images:
+        for i in range(len(images)):
+            images[i] = images[i].replace("/", "\\")
+            list1.insert(tk.END, f"Selected file {images[i]}")
         if text:
-            list1.insert(tk.END, "Image Folder was selected, unselecting Text file")
+            list1.insert(tk.END, "Image/video Files was selected, unselecting Text file")
             text = ""
 
 
@@ -131,7 +122,5 @@ list1.grid(row=0, column=1, sticky="nsew")
 
 list1.configure(yscrollcommand=sb.set)
 sb.configure(command=list1.yview)
-
-list1.bind('<<ListboxSelect>>', get_selected_row)
 
 window.mainloop()
