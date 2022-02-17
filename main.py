@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# TODO: 1)Sending documents, 2)Exception handling for network errors
+# TODO: Exception handling for network errors
 
 # xpath definitions
 send_btn = "/html/body/div[1]/div[1]/div[1]/div[2]/div[2]/span/div[1]/span/div[1]/div/div[2]/div/div[2]/div[2]/div/div"
