@@ -57,9 +57,9 @@ def send() -> None:
             t1.start()
             btn_start.configure(state="disabled")
             obj = main.Automate(numbers)
-            obj.send('DOCUMENT',docs)
+            obj.send('DOCUMENT', docs)
 
-        else:
+        if not (images or text or docs):
             list1.insert(tk.END, "Please select an image or text file to send")
     else:
         list1.insert(tk.END, "Please select an excel file")
@@ -77,12 +77,13 @@ def browse_doc() -> None:
     global text
     global images
     global docs
-    docs = list(filedialog.askopenfilenames(title="Select any document(s)",filetypes=[("All files","*")]))
+    docs = list(filedialog.askopenfilenames(title="Select any document(s)", filetypes=[("All files", "*")]))
 
     if docs:
         for i in range(len(docs)):
-            docs[i] = docs[i].replace("/", "\\")
             list1.insert(tk.END, f"Selected file {docs[i]}")
+            docs[i] = docs[i].replace("/", "\\")
+            docs[i] = '"' + docs[i] + '"'
 
 
 def browse_text() -> None:
@@ -105,8 +106,10 @@ def browse_img() -> None:
 
     if images:
         for i in range(len(images)):
-            images[i] = images[i].replace("/", "\\")
             list1.insert(tk.END, f"Selected file {images[i]}")
+            images[i] = images[i].replace("/", "\\")
+            images[i] = '"' + images[i] + '"'
+
         if text:
             list1.insert(tk.END, "Image/video Files was selected, unselecting Text file")
             text = ""
@@ -121,7 +124,7 @@ list1 = tk.Listbox(window)
 fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
 btn_excel = tk.Button(fr_buttons, text="Open Excel file", command=browse_excel)
 btn_text = tk.Button(fr_buttons, text="Open text file", command=browse_text)
-btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send, daemon=True).start())
+btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send).start())
 btn_close = tk.Button(fr_buttons, text="close", command=window.destroy)
 btn_img = tk.Button(fr_buttons, text="image/video", command=browse_img)
 btn_doc = tk.Button(fr_buttons, text="Documents", command=browse_doc)

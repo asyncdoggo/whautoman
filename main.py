@@ -47,15 +47,7 @@ class Automate:
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
-    def send_files(self, images: list = None, documents: list = None):
-        # local functions
-        def parse_paths(paths: list) -> str:
-            ans = ""
-            for i in paths:
-                ans = ans + str(i)
-                ans = ans + str(" ")
-            return ans
-
+    def send_files(self, documents: list = None, images: list = None):
         # Access the pin button
         pin = self.wait.until(EC.presence_of_element_located((By.XPATH, pinbutton)))
         pin.click()
@@ -72,11 +64,19 @@ class Automate:
             docico.click()
 
         # Convert list of path to a single string
-        combine_path = parse_paths(images)
+        args = ["au.exe"]
+        if images:
+            for i in images:
+                args.append(i)
+
+        if documents:
+            for i in documents:
+                args.append(i)
 
         time.sleep(1)  # SHORT SLEEP TO LET OPEN PROMPT START
         # Use autoit script
-        subprocess.run(['AutoIt_Script.exe', combine_path], shell=True)
+
+        subprocess.Popen(" ".join(args), shell=True)
         time.sleep(1)
 
         # Access the send button
@@ -122,11 +122,11 @@ class Automate:
                 cmsg = f"Message sent to {phone}"
 
             if data_type == 'IMAGE':
-                self.send_files(data) # image/video files
+                self.send_files(images=data)  # image/video files
                 cmsg = f"Message sent to {phone}"
 
             if data_type == 'DOCUMENT':
-                self.send_files(data) # documents
+                self.send_files(documents=data)  # documents
 
         cmsg = 'END'
         time.sleep(5)  # wait for 5 sec and close browser
