@@ -7,9 +7,10 @@ import main
 xlsx = ""
 text = ""
 images = []
+docs = []
 not_found = []
-filetype = ".apng .avif .gif .jpg, .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov .wmv " \
-           ".avi .avchd .mkv .webm"
+filetype = ".apng .avif .gif .jpg, .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov" \
+           ".avi .avchd .mkv .webm .xbm .dib .jxl .svgz .m4v"
 
 
 def insert_to_list() -> None:
@@ -46,12 +47,17 @@ def send() -> None:
             obj = main.Automate(numbers)
             obj.send('TEXT', data)
 
-        elif images:
-            data = images
+        if images:
             t1.start()
             btn_start.configure(state="disabled")
             obj = main.Automate(numbers)
-            obj.send('IMAGE', data)
+            obj.send('IMAGE', images)
+
+        if docs:
+            t1.start()
+            btn_start.configure(state="disabled")
+            obj = main.Automate(numbers)
+            obj.send('DOCUMENT',docs)
 
         else:
             list1.insert(tk.END, "Please select an image or text file to send")
@@ -67,6 +73,18 @@ def browse_excel() -> None:
         list1.insert(tk.END, f"Selected excel file {xlsx}")
 
 
+def browse_doc() -> None:
+    global text
+    global images
+    global docs
+    docs = list(filedialog.askopenfilenames(title="Select any document(s)",filetypes=[("All files","*")]))
+
+    if docs:
+        for i in range(len(docs)):
+            docs[i] = docs[i].replace("/", "\\")
+            list1.insert(tk.END, f"Selected file {docs[i]}")
+
+
 def browse_text() -> None:
     global text
     global images
@@ -76,7 +94,7 @@ def browse_text() -> None:
         list1.insert(tk.END, f"Selected text file {text}")
         if images:
             list1.insert(tk.END, "Text file was selected, unselecting Image Files")
-            images = ()
+            images = []
 
 
 def browse_img() -> None:
@@ -106,14 +124,17 @@ btn_text = tk.Button(fr_buttons, text="Open text file", command=browse_text)
 btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send, daemon=True).start())
 btn_close = tk.Button(fr_buttons, text="close", command=window.destroy)
 btn_img = tk.Button(fr_buttons, text="image/video", command=browse_img)
+btn_doc = tk.Button(fr_buttons, text="Documents", command=browse_doc)
 
 sb = tk.Scrollbar(window)
 
 btn_excel.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 btn_text.grid(row=1, column=0, sticky="ew", padx=5)
-btn_img.grid(row=2, column=0, sticky="ew", padx=5)
-btn_start.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-btn_close.grid(row=4, column=0, sticky="ew", padx=5)
+btn_img.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+btn_doc.grid(row=3, column=0, sticky="ew", padx=5)
+btn_start.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+btn_close.grid(row=5, column=0, sticky="ew", padx=5)
+
 sb.grid(row=0, column=2, rowspan=6, sticky="nse")
 
 fr_buttons.grid(row=0, column=0, sticky="ns")

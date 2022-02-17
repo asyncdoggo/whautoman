@@ -22,6 +22,8 @@ qr_code = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[2]/div"
 ok_button = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div/div[2]"
 text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[2]"
 starting_chat = "_1bpDE"
+document_button = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[" \
+                  "2]/div/span/div[1]/div/ul/li[4]/button "
 
 cmsg = "Please wait...."
 
@@ -45,7 +47,7 @@ class Automate:
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
-    def send_img_vid(self, images: list):
+    def send_files(self, images: list = None, documents: list = None):
         # local functions
         def parse_paths(paths: list) -> str:
             ans = ""
@@ -59,11 +61,17 @@ class Automate:
         pin.click()
 
         # Access the images and video button
-        image_icon = self.wait.until(
-            EC.presence_of_element_located((By.XPATH, imgvid_btn)))
-        image_icon.click()
+        if images:
+            image_icon = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, imgvid_btn)))
+            image_icon.click()
 
-        # Convert list of path to a single string (because it is required by subprocess)
+        if documents:
+            docico = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, document_button)))
+            docico.click()
+
+        # Convert list of path to a single string
         combine_path = parse_paths(images)
 
         time.sleep(1)  # SHORT SLEEP TO LET OPEN PROMPT START
@@ -114,8 +122,11 @@ class Automate:
                 cmsg = f"Message sent to {phone}"
 
             if data_type == 'IMAGE':
-                self.send_img_vid(data)
+                self.send_files(data) # image/video files
                 cmsg = f"Message sent to {phone}"
+
+            if data_type == 'DOCUMENT':
+                self.send_files(data) # documents
 
         cmsg = 'END'
         time.sleep(5)  # wait for 5 sec and close browser
