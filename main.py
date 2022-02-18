@@ -64,7 +64,8 @@ class Automate:
             docico.click()
 
         # Convert list of path to a single string
-        args = ["au.exe"]
+        p = os.path.abspath("au.exe")
+        args = [p]
         if images:
             for i in images:
                 args.append(i)
