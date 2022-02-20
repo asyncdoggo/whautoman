@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# TODO: Exception handling for network errors
+# TODO: Exception handling for network errors and logout from browser
 
 # xpath definitions
 send_btn = "/html/body/div[1]/div[1]/div[1]/div[2]/div[2]/span/div[1]/span/div[1]/div/div[2]/div/div[2]/div[2]/div/div"
@@ -34,10 +34,12 @@ class Automate:
         self.numbers = numbers
 
         # install driver
-        path = ChromeDriverManager().install()
+        os.environ['WDM_LOCAL'] = '1'
+        path = ChromeDriverManager(cache_valid_range=30).install()
         path = path.replace("chromedriver.exe", "")
         # add driver to path
         os.environ["PATH"] += os.pathsep + path
+
 
         # start driver
         self.driver = webdriver.Chrome()
