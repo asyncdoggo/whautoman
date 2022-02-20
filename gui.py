@@ -1,3 +1,4 @@
+import os
 import threading
 import tkinter as tk
 from tkinter import filedialog
@@ -9,7 +10,7 @@ text = ""
 images = []
 docs = []
 not_found = []
-filetype = ".apng .avif .gif .jpg, .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov" \
+filetype = ".apng .avif .gif .jpg .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov" \
            ".avi .avchd .mkv .webm .xbm .dib .jxl .svgz .m4v"
 
 
@@ -80,10 +81,20 @@ def browse_doc() -> None:
     docs = list(filedialog.askopenfilenames(title="Select any document(s)", filetypes=[("All files", "*")]))
 
     if docs:
+        remove = []
         for i in range(len(docs)):
-            list1.insert(tk.END, f"Selected file {docs[i]}")
-            docs[i] = docs[i].replace("/", "\\")
-            docs[i] = '"' + docs[i] + '"'
+            file_size = os.path.getsize(docs[i])
+            if file_size / 1_000_000 < 100.0:
+                list1.insert(tk.END, f"Selected file {docs[i]}")
+                docs[i] = docs[i].replace("/", "\\")
+                docs[i] = '"' + docs[i] + '"'
+            else:
+                list1.insert(tk.END, f"The file {docs[i]} is larger than 64mb which exceeds the limit")
+                remove.append(images[i])
+        for i in remove:
+            docs.remove(i)
+
+
 
 
 def browse_text() -> None:
@@ -105,10 +116,18 @@ def browse_img() -> None:
         filedialog.askopenfilenames(title="Select Images/videos", filetypes=[("Images and Videos", filetype)]))
 
     if images:
+        remove = []
         for i in range(len(images)):
-            list1.insert(tk.END, f"Selected file {images[i]}")
-            images[i] = images[i].replace("/", "\\")
-            images[i] = '"' + images[i] + '"'
+            file_size = os.path.getsize(images[i])
+            if file_size / 1_000_000 < 64.0:
+                list1.insert(tk.END,f"Selected file {images[i]}")
+                images[i] = images[i].replace("/", "\\")
+                images[i] = '"' + images[i] + '"'
+            else:
+                list1.insert(tk.END, f"The file {images[i]} is larger than 64mb which exceeds the limit")
+                remove.append(images[i])
+        for i in remove:
+            images.remove(i)
 
         if text:
             list1.insert(tk.END, "Image/video Files was selected, unselecting Text file")
