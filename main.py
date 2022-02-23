@@ -24,6 +24,8 @@ text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span
 starting_chat = "_1bpDE"
 document_button = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[" \
                   "2]/div/span/div[1]/div/ul/li[4]/button "
+menub="/html/body/div[1]/div[1]/div[1]/div[3]/div/header/div[2]/div/span/div[3]/div/span"
+logoutb="/html/body/div[1]/div[1]/div[1]/div[3]/div/header/div[2]/div/span/div[3]/span/div[1]/ul/li[4]/div[1]"
 
 cmsg = "Please wait...."
 
@@ -35,7 +37,7 @@ class Automate:
 
         # install driver
         os.environ['WDM_LOCAL'] = '1'
-        path = ChromeDriverManager(cache_valid_range=30).install()
+        path = ChromeDriverManager().install()
         path = path.replace("chromedriver.exe", "")
         # add driver to path
         os.environ["PATH"] += os.pathsep + path
@@ -132,7 +134,13 @@ class Automate:
                 self.send_files(documents=data)  # documents
 
         cmsg = 'END'
-        time.sleep(5)  # wait for 5 sec and close browser
+
+
+        menubutton = self.wait.until(EC.presence_of_element_located((By.XPATH,menub)))
+        menubutton.click()
+        time.sleep(10)
+        logoutbutton = self.wait.until(EC.presence_of_element_located((By.XPATH,logoutb)))
+        logoutbutton.click()
 
 
 if __name__ == "__main__":
