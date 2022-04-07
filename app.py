@@ -11,8 +11,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# TODO: Exception handling for network errors and logout from browser
-
+# TODO: Exception handling for network errors
+# TODO: website updated starting chat no more a thing needs change
 # xpath definitions
 send_btn = "/html/body/div[1]/div[1]/div[1]/div[2]/div[2]/span/div[1]/span/div[1]/div/div[2]/div/div[2]/div[2]/div/div"
 imgvid_btn = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/span/div[" \
@@ -24,8 +24,7 @@ text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span
 starting_chat = "_1bpDE"
 document_button = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[" \
                   "2]/div/span/div[1]/div/ul/li[4]/button "
-menub = "/html/body/div[1]/div[1]/div[1]/div[3]/div/header/div[2]/div/span/div[3]/div/span"
-logoutb = "/html/body/div[1]/div[1]/div[1]/div[3]/div/header/div[2]/div/span/div[3]/span/div[1]/ul/li[4]/div[1]"
+keepme = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[3]/label/input"
 
 cmsg = "Please wait...."
 
@@ -47,6 +46,8 @@ class Automate:
         self.wait = WebDriverWait(self.driver, 600)
         self.driver.get("https://web.whatsapp.com/")
 
+        checkbox = self.wait.until(EC.presence_of_element_located((By.XPATH, keepme)))
+        checkbox.click()
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
@@ -133,12 +134,6 @@ class Automate:
                 self.send_files(documents=data)  # documents
 
         cmsg = 'END'
-
-        menubutton = self.wait.until(EC.presence_of_element_located((By.XPATH, menub)))
-        menubutton.click()
-        time.sleep(10)
-        logoutbutton = self.wait.until(EC.presence_of_element_located((By.XPATH, logoutb)))
-        logoutbutton.click()
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog
 import pandas
-import main
+import app
 
 xlsx = ""
 text = ""
@@ -18,7 +18,7 @@ def insert_to_list() -> None:
     log = ""
     prev = ()
     while log != 'END':
-        log = main.cmsg
+        log = app.cmsg
         if prev != log:
             prev = log
             list1.insert(tk.END, log)
@@ -43,21 +43,22 @@ def send() -> None:
         if text:
             with open(text, 'r') as f:
                 data = f.read()
+                data = data.replace("\n", "\uE007")
             t1.start()
             btn_start.configure(state="disabled")
-            obj = main.Automate(numbers)
+            obj = app.Automate(numbers)
             obj.send('TEXT', data)
 
         if images:
             t1.start()
             btn_start.configure(state="disabled")
-            obj = main.Automate(numbers)
+            obj = app.Automate(numbers)
             obj.send('IMAGE', images)
 
         if docs:
             t1.start()
             btn_start.configure(state="disabled")
-            obj = main.Automate(numbers)
+            obj = app.Automate(numbers)
             obj.send('DOCUMENT', docs)
 
         if not (images or text or docs):
@@ -95,8 +96,6 @@ def browse_doc() -> None:
             docs.remove(i)
 
 
-
-
 def browse_text() -> None:
     global text
     global images
@@ -120,7 +119,7 @@ def browse_img() -> None:
         for i in range(len(images)):
             file_size = os.path.getsize(images[i])
             if file_size / 1_000_000 < 64.0:
-                list1.insert(tk.END,f"Selected file {images[i]}")
+                list1.insert(tk.END, f"Selected file {images[i]}")
                 images[i] = images[i].replace("/", "\\")
                 images[i] = '"' + images[i] + '"'
             else:
