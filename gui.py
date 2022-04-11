@@ -1,9 +1,11 @@
 import os
 import threading
+import time
 import tkinter as tk
 from tkinter import filedialog
 import pandas
 import app
+import requests
 
 xlsx = ""
 text = ""
@@ -12,6 +14,7 @@ docs = []
 not_found = []
 filetype = ".apng .avif .gif .jpg .jpeg .jfif .pjpeg .pjp .png .svg .webp .bmp .ico .cur .tif .tiff .mp4 .mov" \
            ".avi .avchd .mkv .webm .xbm .dib .jxl .svgz .m4v"
+global obj
 
 
 def insert_to_list() -> None:
@@ -35,34 +38,54 @@ def insert_to_list() -> None:
     btn_start.configure(state="normal")
 
 
+def check_connection():
+    try:
+        while True:
+            requests.get("https://web.whatsapp.com/")
+            time.sleep(1)
+    except requests.exceptions.ConnectionError:
+        list1.insert(tk.END, "Connection error")
+        obj.close()
+
+
 def send() -> None:
+    global obj
     t1 = threading.Thread(target=insert_to_list)
+    t2 = threading.Thread(target=check_connection)
     if xlsx:
         excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
         numbers = excel_data["Numbers"].to_list()
-        if text:
-            with open(text, 'r') as f:
-                data = f.read()
-                data = data.replace("\n", "\uE007")
-            t1.start()
-            btn_start.configure(state="disabled")
-            obj = app.Automate(numbers)
-            obj.send('TEXT', data)
+        try:
+            if text:
+                with open(text, 'r') as f:
+                    data = f.read()
+                    data = data.replace("\n", "\uE007")
+                t1.start()
+                t2.start()
+                btn_start.configure(state="disabled")
+                obj = app.Automate(numbers)
+                obj.send('TEXT', data)
 
-        if images:
-            t1.start()
-            btn_start.configure(state="disabled")
-            obj = app.Automate(numbers)
-            obj.send('IMAGE', images)
+            if images:
+                t1.start()
+                t2.start()
 
-        if docs:
-            t1.start()
-            btn_start.configure(state="disabled")
-            obj = app.Automate(numbers)
-            obj.send('DOCUMENT', docs)
+                btn_start.configure(state="disabled")
+                obj = app.Automate(numbers)
+                obj.send('IMAGE', images)
 
-        if not (images or text or docs):
-            list1.insert(tk.END, "Please select an image or text file to send")
+            if docs:
+                t1.start()
+                t2.start()
+                btn_start.configure(state="disabled")
+                obj = app.Automate(numbers)
+                obj.send('DOCUMENT', docs)
+
+            if not (images or text or docs):
+                list1.insert(tk.END, "Please select an image or text file to send")
+        except requests.exceptions.ConnectionError:
+            list1.insert(tk.END, "Network error")
+            btn_start.configure(state="normal")
     else:
         list1.insert(tk.END, "Please select an excel file")
 
@@ -108,6 +131,11 @@ def browse_text() -> None:
             images = []
 
 
+def quitapp():
+    threading.Thread(target=obj.close).start()
+    window.destroy()
+
+
 def browse_img() -> None:
     global images
     global text
@@ -118,12 +146,12 @@ def browse_img() -> None:
         remove = []
         for i in range(len(images)):
             file_size = os.path.getsize(images[i])
-            if file_size / 1_000_000 < 64.0:
+            if file_size / 1_000_000 < 16.0:
                 list1.insert(tk.END, f"Selected file {images[i]}")
                 images[i] = images[i].replace("/", "\\")
                 images[i] = '"' + images[i] + '"'
             else:
-                list1.insert(tk.END, f"The file {images[i]} is larger than 64mb which exceeds the limit")
+                list1.insert(tk.END, f"The file {images[i]} is larger than 16mb which exceeds the limit")
                 remove.append(images[i])
         for i in remove:
             images.remove(i)
@@ -143,7 +171,7 @@ fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
 btn_excel = tk.Button(fr_buttons, text="Open Excel file", command=browse_excel)
 btn_text = tk.Button(fr_buttons, text="Open text file", command=browse_text)
 btn_start = tk.Button(fr_buttons, text="Start", command=lambda: threading.Thread(target=send).start())
-btn_close = tk.Button(fr_buttons, text="close", command=window.destroy)
+btn_close = tk.Button(fr_buttons, text="close", command=quitapp)
 btn_img = tk.Button(fr_buttons, text="image/video", command=browse_img)
 btn_doc = tk.Button(fr_buttons, text="Documents", command=browse_doc)
 

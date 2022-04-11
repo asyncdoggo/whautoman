@@ -3,3 +3,4 @@ selenium
 pandas
 Tk
 openpyxl
+requests
