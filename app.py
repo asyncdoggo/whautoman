@@ -4,7 +4,6 @@ import time
 from typing import Union
 import pandas
 import requests
-
 import selenium.common.exceptions
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
@@ -36,7 +35,7 @@ class Automate:
         self.numbers = numbers
 
         # install driver
-        os.environ['WDM_LOCAL'] = '1'
+        #os.environ['WDM_LOCAL'] = '1'
         path = ChromeDriverManager(cache_valid_range=30).install()
 
         path = path.replace("chromedriver.exe", "")
@@ -48,8 +47,6 @@ class Automate:
         self.wait = WebDriverWait(self.driver, 600)
         self.driver.get("https://web.whatsapp.com/")
 
-        checkbox = self.wait.until(EC.presence_of_element_located((By.XPATH, keepme)))
-        checkbox.click()
         # initial qr login
         self.wait.until_not(EC.presence_of_element_located((By.XPATH, qr_code)))
 
