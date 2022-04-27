@@ -123,12 +123,25 @@ class Automate:
                     text.send_keys(Keys.ENTER)
                     cmsg = f"Message sent to {phone}"
 
-                if data_type == 'IMAGE':
+                elif data_type == 'IMAGE':
                     self.send_files(images=data)  # image/video files
-                    cmsg = f"Message sent to {phone}"
+                    cmsg = f"Image sent to {phone}"
 
-                if data_type == 'DOCUMENT':
+                elif data_type == 'DOCUMENT':
                     self.send_files(documents=data)  # documents
+                    cmsg = f"Document sent to {phone}"
+
+                elif data_type == "TEXT+IMAGE":
+                    text.send_keys(data[0])
+                    text.send_keys(Keys.ENTER)
+                    self.send_files(images=data[1])
+                    cmsg = f"Data sent to {phone}"
+
+                elif data_type == "TEXT+DOCS":
+                    text.send_keys(data[0])
+                    text.send_keys(Keys.ENTER)
+                    self.send_files(documents=data[1])
+                    cmsg = f"Data sent to {phone}"
 
             cmsg = 'END'
         except selenium.common.exceptions.WebDriverException as e:

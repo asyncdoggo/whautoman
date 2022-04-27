@@ -56,7 +56,30 @@ def send() -> None:
         excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
         numbers = excel_data["Numbers"].to_list()
         try:
-            if text:
+            if text and images:
+                with open(text, 'r') as f:
+                    text_file = f.read()
+                    text_file = text_file.replace("\n", "\uE007")
+                t1.start()
+                t2.start()
+                btn_start.configure(state="disabled")
+                data = [text_file, images]
+                obj = app.Automate(numbers)
+                obj.send('TEXT+IMAGE', data)
+
+            elif text and docs:
+                with open(text, 'r') as f:
+                    text_file = f.read()
+                    text_file = text_file.replace("\n", "\uE007")
+                t1.start()
+                t2.start()
+                btn_start.configure(state="disabled")
+                data = [text_file, docs]
+                obj = app.Automate(numbers)
+                obj.send('TEXT+DOCS', data)
+
+
+            elif text:
                 with open(text, 'r') as f:
                     data = f.read()
                     data = data.replace("\n", "\uE007")
@@ -66,7 +89,7 @@ def send() -> None:
                 obj = app.Automate(numbers)
                 obj.send('TEXT', data)
 
-            if images:
+            elif images:
                 t1.start()
                 t2.start()
 
@@ -74,7 +97,7 @@ def send() -> None:
                 obj = app.Automate(numbers)
                 obj.send('IMAGE', images)
 
-            if docs:
+            elif docs:
                 t1.start()
                 t2.start()
                 btn_start.configure(state="disabled")
@@ -92,14 +115,13 @@ def send() -> None:
 
 def browse_excel() -> None:
     global xlsx
-    xlsx = filedialog.askopenfilename(title="Select a Excel File", filetypes=[("Excel file", ".xlsx .xls")])
+    xlsx = filedialog.askopenfilename(title="Select an Excel File", filetypes=[("Excel file", ".xlsx .xls")])
 
     if xlsx:
         list1.insert(tk.END, f"Selected excel file {xlsx}")
 
 
 def browse_doc() -> None:
-    global text
     global images
     global docs
     docs = list(filedialog.askopenfilenames(title="Select any document(s)", filetypes=[("All files", "*")]))
@@ -118,17 +140,17 @@ def browse_doc() -> None:
         for i in remove:
             docs.remove(i)
 
+        if images:
+            images = []
+            list1.insert(tk.END, "Document file was selected, unselecting image/video files")
+
 
 def browse_text() -> None:
     global text
-    global images
     text = filedialog.askopenfilename(title="Select a text File", filetypes=[("Text file", ".txt")])
 
     if text:
         list1.insert(tk.END, f"Selected text file {text}")
-        if images:
-            list1.insert(tk.END, "Text file was selected, unselecting Image Files")
-            images = []
 
 
 def quitapp():
@@ -137,8 +159,8 @@ def quitapp():
 
 
 def browse_img() -> None:
+    global docs
     global images
-    global text
     images = list(
         filedialog.askopenfilenames(title="Select Images/videos", filetypes=[("Images and Videos", filetype)]))
 
@@ -147,7 +169,7 @@ def browse_img() -> None:
         for i in range(len(images)):
             file_size = os.path.getsize(images[i])
             if file_size / 1_000_000 < 16.0:
-                list1.insert(tk.END, f"Selected file {images[i]}")
+                list1.insert(tk.END, f"Selected Image {images[i]}")
                 images[i] = images[i].replace("/", "\\")
                 images[i] = '"' + images[i] + '"'
             else:
@@ -156,9 +178,9 @@ def browse_img() -> None:
         for i in remove:
             images.remove(i)
 
-        if text:
-            list1.insert(tk.END, "Image/video Files was selected, unselecting Text file")
-            text = ""
+        if docs:
+            list1.insert(tk.END, "Image/video Files was selected, unselecting document files")
+            docs = []
 
 
 window = tk.Tk()
