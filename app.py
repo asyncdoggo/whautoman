@@ -24,8 +24,6 @@ text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span
 starting_chat = "_1bpDE"
 document_button = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[" \
                   "2]/div/span/div[1]/div/ul/li[4]/button "
-keepme = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div/div[3]/label/input"
-
 cmsg = "Please wait...."
 
 
@@ -35,7 +33,7 @@ class Automate:
         self.numbers = numbers
 
         # install driver
-        #os.environ['WDM_LOCAL'] = '1'
+        os.environ['WDM_LOCAL'] = '1'
         path = ChromeDriverManager(cache_valid_range=30).install()
 
         path = path.replace("chromedriver.exe", "")
