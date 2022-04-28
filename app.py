@@ -23,7 +23,7 @@ ok_button = "/html/body/div[1]/div[1]/span[2]/div[1]/span/div[1]/div/div/div/div
 text_box = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[2]/div[1]/div/div[2]"
 starting_chat = "_1bpDE"
 document_button = "/html/body/div[1]/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div/span[2]/div/div[1]/div[" \
-                  "2]/div/span/div[1]/div/ul/li[4]/button "
+                  "2]/div/span/div[1]/div/ul/li[4]/button"
 cmsg = "Please wait...."
 
 
@@ -59,7 +59,7 @@ class Automate:
                 EC.presence_of_element_located((By.XPATH, imgvid_btn)))
             image_icon.click()
 
-        if documents:
+        elif documents:
             docico = self.wait.until(
                 EC.presence_of_element_located((By.XPATH, document_button)))
             docico.click()
@@ -71,7 +71,7 @@ class Automate:
             for i in images:
                 args.append(i)
 
-        if documents:
+        elif documents:
             for i in documents:
                 args.append(i)
 
