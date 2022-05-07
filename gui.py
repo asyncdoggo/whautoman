@@ -53,7 +53,7 @@ def send() -> None:
     t1 = threading.Thread(target=insert_to_list)
     t2 = threading.Thread(target=check_connection)
     if xlsx:
-        excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
+        excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1", dtype=str)
         numbers = excel_data["Numbers"].to_list()
         excel_data = excel_data.dropna()
         try:
