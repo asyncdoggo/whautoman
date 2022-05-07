@@ -121,6 +121,7 @@ class Automate:
                 if data_type == 'TEXT':
                     text.send_keys(data)
                     text.send_keys(Keys.ENTER)
+                    time.sleep(2)
                     cmsg = f"Message sent to {phone}"
 
                 elif data_type == 'IMAGE':

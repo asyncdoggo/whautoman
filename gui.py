@@ -55,6 +55,7 @@ def send() -> None:
     if xlsx:
         excel_data = pandas.read_excel(xlsx, sheet_name="Sheet1")
         numbers = excel_data["Numbers"].to_list()
+        excel_data = excel_data.dropna()
         try:
             if text and images:
                 with open(text, 'r') as f:
